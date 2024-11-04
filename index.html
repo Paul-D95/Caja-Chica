@@ -4,56 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rendición de Caja Chica</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilo General */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Título Principal */
+        .title {
+            text-align: center;
+            font-size: 26px;
+            color: #4CAF50;
+            margin: 0;
+            padding: 10px 0;
+        }
+
+        /* Botones de Descarga */
+        .download-buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .download-buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Ocultar botones al generar PDF */
+        .no-print {
+            display: inline;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        /* Cabecera */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .header-item {
+            flex: 1 1 45%; /* Ajusta el ancho de cada elemento */
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .header-label {
+            font-weight: bold;
+            color: #333;
+            margin-right: 5px;
+        }
+
+        .header-value {
+            color: #555;
+            text-align: left;
+        }
+
+        /* Estilo de la Tabla */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            font-size: 12px; /* Reduce el tamaño de fuente en la tabla */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        thead th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+            font-size: 11px; /* Reduce el tamaño de fuente en los encabezados */
+        }
+
+        tbody td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+            font-size: 11px; /* Reduce el tamaño de fuente en las celdas */
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f9f1;
+        }
+    </style>
+    <!-- Bibliotecas para PDF y Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 </head>
 <body>
-    <!-- Cabecera -->
-    <div class="header">
-        <h1>Rendición de Caja Chica</h1>
-        <div class="info">Fecha de Rendición: {{FechaRendicion}}</div>
-        <div class="info">Encargado: {{Encargado}}</div>
-        <div class="info">N° de Presupuesto: {{NroPresupuesto}}</div>
-        <div class="info">Mes Correspondiente: {{MesCorrespondiente}}</div>
-        <div class="info">Periodo Desde: {{PeriodoDesde}}</div>
-        <div class="info">Periodo Hasta: {{PeriodoHasta}}</div>
-        <div class="info">Moneda: {{Moneda}}</div>
+    <div class="container" id="content">
+        <!-- Título Principal -->
+        <h1 class="title">Rendición de Caja Chica</h1>
+
+        <!-- Cabecera -->
+        <div class="header">
+            <!-- Elementos de Cabecera -->
+            <div class="header-item">
+                <span class="header-label">Fecha de Rendición:</span>
+                <span class="header-value">{{FechaRendicion}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Encargado:</span>
+                <span class="header-value">{{Encargado}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">N° de Presupuesto:</span>
+                <span class="header-value">{{NroPresupuesto}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Mes Correspondiente:</span>
+                <span class="header-value">{{MesCorrespondiente}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Periodo Desde:</span>
+                <span class="header-value">{{PeriodoDesde}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Periodo Hasta:</span>
+                <span class="header-value">{{PeriodoHasta}}</span>
+            </div>
+            <div class="header-item">
+                <span class="header-label">Moneda:</span>
+                <span class="header-value">{{Moneda}}</span>
+            </div>
+        </div>
+
+        <!-- Cuerpo: Tabla de Transacciones -->
+        <div class="table-container" id="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Razón Social</th>
+                        <th style="width: 12%;">Tipo Comprobante</th>
+                        <th style="width: 7%;">Serie</th>
+                        <th style="width: 7%;">Número</th>
+                        <th style="width: 12%;">Fecha de Emisión</th>
+                        <th style="width: 15%;">Descripción</th>
+                        <th style="width: 8%;">Ingresos</th>
+                        <th style="width: 8%;">Egresos</th>
+                        <th style="width: 8%;">Saldo</th>
+                        <th style="width: 10%;">Categoría de Gasto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ejemplo de Fila -->
+                    <tr>
+                        <td>{{RazonSocial}}</td>
+                        <td>{{TipoComprobante}}</td>
+                        <td>{{SerieComprobante}}</td>
+                        <td>{{NumeroComprobante}}</td>
+                        <td>{{FechaEmision}}</td>
+                        <td>{{Descripcion}}</td>
+                        <td>{{Ingresos}}</td>
+                        <td>{{Egresos}}</td>
+                        <td>{{Saldo}}</td>
+                        <td>{{CategoriaGasto}}</td>
+                    </tr>
+                    <!-- Repetir filas para cada entrada -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botones de Descarga (ocultos en el PDF) -->
+        <div class="download-buttons no-print">
+            <button onclick="downloadPDF()">Descargar PDF</button>
+            <button onclick="downloadExcel()">Descargar Excel</button>
+        </div>
     </div>
 
-    <!-- Cuerpo: Tabla de Transacciones -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Razón Social</th>
-                    <th>Tipo Comprobante</th>
-                    <th>Serie</th>
-                    <th>Número</th>
-                    <th>Fecha de Emisión</th>
-                    <th>Descripción</th>
-                    <th>Ingresos</th>
-                    <th>Egresos</th>
-                    <th>Saldo</th>
-                    <th>Categoría de Gasto</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Ejemplo de Fila -->
-                <tr>
-                    <td>{{RazonSocial}}</td>
-                    <td>{{TipoComprobante}}</td>
-                    <td>{{SerieComprobante}}</td>
-                    <td>{{NumeroComprobante}}</td>
-                    <td>{{FechaEmision}}</td>
-                    <td>{{Descripcion}}</td>
-                    <td>{{Ingresos}}</td>
-                    <td>{{Egresos}}</td>
-                    <td>{{Saldo}}</td>
-                    <td>{{CategoriaGasto}}</td>
-                </tr>
-                <!-- Repetir filas para cada entrada -->
-            </tbody>
-        </table>
-    </div>
+    <script>
+        // Función para descargar en PDF
+        function downloadPDF() {
+            // Clonar el contenido sin los botones de descarga
+            const content = document.getElementById('content').cloneNode(true);
+            content.querySelector('.download-buttons').remove();
+
+            const options = {
+                margin: [5, 0, 5, 0], // Márgenes ajustados
+                filename: 'rendicion_caja_chica.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 4, scrollY: 0 }, // Escala aumentada para mayor claridad
+                jsPDF: { unit: 'pt', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(options).from(content).save();
+        }
+
+        // Función para descargar en Excel
+        function downloadExcel() {
+            const table = document.getElementById('data-table');
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "RendicionCajaChica" });
+            XLSX.writeFile(workbook, 'rendicion_caja_chica.xlsx');
+        }
+    </script>
 </body>
 </html>
- <!-- prueba de  filas para cada entrada -->
+
